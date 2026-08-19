@@ -1,13 +1,17 @@
-let totalLogs = 0;
-let gameLogs = {};
+let globalTotal = 0;
+let gameCounters = {};
 
 module.exports = async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
+    }
+
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
     }
 
     const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1530217450468147361/TzpmM1qBdSLKSIAtnXURf8-xUx2VCf0GEw-9fl0SYiZAuhueHvIFcxYrxUDjPHqw7qnE";
@@ -24,14 +28,15 @@ module.exports = async (req, res) => {
         const gameId = String(body.gameId || "0");
         const gameName = body.gameName || "Unknown Game";
 
-        // Считаем логи
-        totalLogs += 1;
-        if (!gameLogs[gameId]) {
-            gameLogs[gameId] = 0;
+        // Инкрементируем общие цифры
+        globalTotal += 1;
+        if (!gameCounters[gameId]) {
+            gameCounters[gameId] = 0;
         }
-        gameLogs[gameId] += 1;
+        gameCounters[gameId] += 1;
 
-        const currentGameLogs = gameLogs[gameId];
+        const currentGameLogs = gameCounters[gameId];
+        const totalLogs = globalTotal;
 
         const discordPayload = {
             embeds: [{
