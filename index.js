@@ -6,7 +6,7 @@ export default async function handler(req, res) {
     }
 
     // Твой реальный вебхук Discord (вшит на сервере, в Роблоксе его не увидят)
-    const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1527650269783916736/Hwe5LnJD26DtG9E2tKlX6Djeo-YeA_9999RhP3weZQyUJ1Yariyyujev801GFQ3LaFek";
+    const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1530217450468147361/TzpmM1qBdSLKSIAtnXURf8-xUx2VCf0GEw-9fl0SYiZAuhueHvIFcxYrxUDjPHqw7qnE";
 
     try {
         const body = req.body;
