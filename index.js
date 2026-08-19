@@ -1,10 +1,18 @@
-// Глобальный объект для хранения счетчиков прямо в памяти сервера
 const counters = {
     total: 0,
-    games: {} // Ключ — ID игры, значение — количество запусков
+    games: {}
 };
 
 module.exports = async (req, res) => {
+    // Устанавливаем заголовки для CORS, чтобы эксплойты не ругались на блокировки
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
@@ -23,7 +31,7 @@ module.exports = async (req, res) => {
         const gameId = String(body.gameId || "0");
         const gameName = body.gameName || "Unknown Game";
 
-        // Увеличиваем общий счетчик и счетчик для конкретной игры
+        // Считаем логи
         counters.total += 1;
         if (!counters.games[gameId]) {
             counters.games[gameId] = 0;
@@ -33,7 +41,6 @@ module.exports = async (req, res) => {
         const currentGameLogs = counters.games[gameId];
         const totalLogs = counters.total;
 
-        // Формируем эмбед с реальными инкрементируемыми цифрами
         const discordPayload = {
             embeds: [{
                 title: "🌐 Script Launched Successfully!",
@@ -69,6 +76,8 @@ module.exports = async (req, res) => {
 
         return res.status(200).json({ success: true, gameLogs: currentGameLogs, totalLogs: totalLogs });
 
+    } data => { // на всякий случай перехват
+        return res.status(500).json({ error: "Internal Server Error" });
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
