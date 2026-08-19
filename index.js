@@ -1,28 +1,21 @@
-const counters = {
-    total: 0,
-    games: {}
-};
+let totalLogs = 0;
+let gameLogs = {};
 
 module.exports = async (req, res) => {
-    // Устанавливаем заголовки для CORS, чтобы эксплойты не ругались на блокировки
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
     }
 
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' });
-    }
-
     const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1530217450468147361/TzpmM1qBdSLKSIAtnXURf8-xUx2VCf0GEw-9fl0SYiZAuhueHvIFcxYrxUDjPHqw7qnE";
 
     try {
-        let body = req.body;
+        let body = req.body || {};
         if (typeof body === 'string') {
-            body = JSON.parse(body);
+            try { body = JSON.parse(body); } catch (e) {}
         }
 
         const scriptName = body.scriptName || "General Script";
@@ -32,14 +25,13 @@ module.exports = async (req, res) => {
         const gameName = body.gameName || "Unknown Game";
 
         // Считаем логи
-        counters.total += 1;
-        if (!counters.games[gameId]) {
-            counters.games[gameId] = 0;
+        totalLogs += 1;
+        if (!gameLogs[gameId]) {
+            gameLogs[gameId] = 0;
         }
-        counters.games[gameId] += 1;
+        gameLogs[gameId] += 1;
 
-        const currentGameLogs = counters.games[gameId];
-        const totalLogs = counters.total;
+        const currentGameLogs = gameLogs[gameId];
 
         const discordPayload = {
             embeds: [{
@@ -71,13 +63,11 @@ module.exports = async (req, res) => {
 
         if (!discordResponse.ok) {
             const errText = await discordResponse.text();
-            return res.status(500).json({ error: "Discord API Error", details: errText });
+            return res.status(500).json({ error: "Discord Error", details: errText });
         }
 
         return res.status(200).json({ success: true, gameLogs: currentGameLogs, totalLogs: totalLogs });
 
-    } data => { // на всякий случай перехват
-        return res.status(500).json({ error: "Internal Server Error" });
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
