@@ -1,27 +1,23 @@
-// index.js (Node.js / Vercel Serverless Function)
-export default async function handler(req, res) {
-    // Разрешаем запросы только методом POST
+module.exports = async (req, res) => {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    // Твой реальный вебхук Discord (вшит на сервере, в Роблоксе его не увидят)
     const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1530217450468147361/TzpmM1qBdSLKSIAtnXURf8-xUx2VCf0GEw-9fl0SYiZAuhueHvIFcxYrxUDjPHqw7qnE";
 
     try {
-        const body = req.body;
+        // Парсим тело запроса безопасно
+        let body = req.body;
+        if (typeof body === 'string') {
+            body = JSON.parse(body);
+        }
+
         const scriptName = body.scriptName || "General Script";
         const playerName = body.playerName || "Unknown";
         const playerId = body.playerId || 0;
         const gameId = body.gameId || 0;
         const gameName = body.gameName || "Unknown Game";
 
-        // Простейший механизм подсчета (можно привязать базу данных, 
-        // но для теста пока сделаем инкремент в памяти или передачу счетчиков)
-        // Для стабильности счетчиков на постоянку лучше использовать KV-хранилище Vercel,
-        // но пока проверим саму связку.
-        
-        // Формируем красивый Embed для отправки в твой Discord канал
         const discordPayload = {
             embeds: [{
                 title: "🌐 Script Launched Successfully!",
@@ -44,7 +40,6 @@ export default async function handler(req, res) {
             }]
         };
 
-        // Отправляем запрос в Discord
         const discordResponse = await fetch(DISCORD_WEBHOOK_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -56,9 +51,9 @@ export default async function handler(req, res) {
             return res.status(500).json({ error: "Discord API Error", details: errText });
         }
 
-        return res.status(200).json({ success: true, message: "Log sent successfully!" });
+        return res.status(200).json({ success: true, message: "Log sent to Discord!" });
 
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
-}
+};
