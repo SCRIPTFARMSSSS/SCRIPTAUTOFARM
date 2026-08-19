@@ -1,5 +1,8 @@
-let globalTotal = 0;
-let gameCounters = {};
+// Используем глобальный объект в памяти процесса Vercel
+let globalStats = {
+    total: 0,
+    games: {}
+};
 
 module.exports = async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -28,15 +31,15 @@ module.exports = async (req, res) => {
         const gameId = String(body.gameId || "0");
         const gameName = body.gameName || "Unknown Game";
 
-        // Инкрементируем общие цифры
-        globalTotal += 1;
-        if (!gameCounters[gameId]) {
-            gameCounters[gameId] = 0;
+        // Увеличиваем общие цифры
+        globalStats.total += 1;
+        if (!globalStats.games[gameId]) {
+            globalStats.games[gameId] = 0;
         }
-        gameCounters[gameId] += 1;
+        globalStats.games[gameId] += 1;
 
-        const currentGameLogs = gameCounters[gameId];
-        const totalLogs = globalTotal;
+        const currentGameLogs = globalStats.games[gameId];
+        const totalLogs = globalStats.total;
 
         const discordPayload = {
             embeds: [{
